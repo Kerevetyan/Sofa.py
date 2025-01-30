@@ -1,5 +1,6 @@
 # Sofa.py
 import random
+import random
 
 choices = []
 print("Введіть свої варіанти рішень (введіть 'stop' для завершення):")
