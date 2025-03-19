@@ -1,88 +1,65 @@
-'''import telebot
-import schedule
-import time
-import datetime
+import telebot
+import random
 
-# TOken
-TOKEN = ""
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot('')
 
-# user ID
-CHAT_ID =  #ID чату (@userinfobot)
+UPLOAD_FOLDER = r"C:\memes/"
 
-# налаштування розкладу
-def send_reminder():
-    bot.send_message(CHAT_ID, "Час зробити важливу справу")
+memes = ["1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", "7.jpg", "8.jpg", "9.jpg", "10.jpg", "11.jpg", "12.jpg", "13.jpg", "14.jpg", "15.jpg", "16.jpg", "17.jpg", "18.jpg", "19.jpg", "20.jpg", "24.jpg", "25.jpg", "26.jpg", "27.jpg", "28.jpg", "29.jpg", "30.jpg"]
 
-# Я часто забуваю зарядити навушники
-def send_reminder1():
-    bot.send_message(CHAT_ID, "Поставити навушники на зарядку")
+reactions = ["АХХАХАХА, РЖАКА", "Хахахахаха, не смішно", "ГЕНІАЛЬНО, ХАХАХАХ", "Що це було?", "Цікаво, але не смішно"]
 
-# Бот вітає з новим роком)
-def send_reminder2():
-    bot.send_message(CHAT_ID, "Зустрічаємо новий 2222 рік!")
+@bot.message_handler(commands = ["start"])
+def send_welcome(message):
+    bot.reply_to(message, "Я бот легендарна свинка! Я розповідаю жарти надсилаю меми та дуркую. Команда /info або /help щоб дізнатись більше")
 
-def new_year_greeting():
-    today = datetime.date.today()
-    if today.month == 1 and today.day == 1:  # Перевіряємо, чи сьогодні 1 січня
-        send_reminder2()
+# Команда help Відправляє повідомлення з підказками
+@bot.message_handler(commands = ["help"])
+def send_help(message):
+    bot.reply_to(message, "Я можу допомогти тобі з командами: /start, /help, /info, /randomphrase, /telljoke, /meme, /photo, /count, Здається все😊")
 
-# заплановані нагадування
-schedule.every().day.at("09:00").do(send_reminder)
-schedule.every().day.at("18:00").do(send_reminder)
-schedule.every().day.at("15:55").do(send_reminder1)
-schedule.every().day.at("00:00").do(new_year_greeting)
-schedule.every(10).seconds.do(send_reminder)
+@bot.message_handler(commands = ["telljoke"])
+def tell_joke(message):
+    jokes = ["Я розповім тобі правду хороший рузький - мертвий рузький", "Надоїло ходи до діда /randomphrase", "Стакан з водою дивиться на порожній і каже: ти прям як вилитий я", "Крінж короче"]
+    bot.reply_to(message, random.choice(jokes))
 
-# Основний цикл
-while True:
-    try:
-        schedule.run_pending()
-        time.sleep(1)
-    except Exception as e:
-        print(f"Помилка: {e}")
-        time.sleep(5)'''
+@bot.message_handler(commands = ["info"])
+def tell_info(message):
+    bot.reply_to(message, "У мене також є багато різних команд через слеш, натисніть /help щоб побачити їх усі!")
 
+@bot.message_handler(commands = ["randomphrase"])
+def random_message(message):
+    phrase = ["Ой у лузі червона калина", "ПЄНАПЛААААСТ", "Wake up to relity", "Ідеї закінчились іди до /telljoke", "Я тоже хочу шоколадку(", "9 чи 10"]
+    bot.reply_to(message, random.choice(phrase))
 
+@bot.message_handler(content_types=["photo"])
+def recive_meme(message):
+#Дістаємо інформацію про надісланий файл із мемом
+    file_info = bot.get_file(message.photo[-1].file_id)
+#Завантажуємо файл з мемом
+    downloaded_file = bot.download_file(file_info.file_path)
+# Зберігаємо мем на комп'ютері унікальним іменем
+    file_name = str(len(memes)+1) + ".jpg"
+    with open(UPLOAD_FOLDER + file_name, 'wb') as new_file:
+        new_file.write(downloaded_file)
+#Додаємо назву мема в список memes
+    memes.append(file_name)
+    bot.reply_to(message, random.choice(reactions))
 
-'''import telebot
+@bot.message_handler(commands = ['meme'])
+def send_random_meme(message):
+    if memes:
+        meme = random.choice(memes)
+        with open(UPLOAD_FOLDER + meme, 'rb') as photo:
+            bot.send_photo(message.chat.id, photo)
 
-TOKEN = ""
-
-bot = telebot.TeleBot(TOKEN)
-chat_id = 
-
-def convert_unit(value, from_units, to_units):
-    conversions = {
-        "чашки": {"мілілітри":240},
-        "столових_ложок": {"мілілітри":15},
-        "чайних_ложок": {"мілілітри":5},
-        "склянки": {"мілілітри":250},
-        "каструлі": {"мілілітри":1000},
-        "ополоників": {"мілілітри":236}
-    }
-    if from_units in conversions and to_units in conversions[from_units]:
-        return value * conversions[from_units][to_units]
     else:
-        return None
-@bot.message_handler(commands=["start"])
-def send_hello(message):
-    bot.send_message(message.chat.id, "Привіт, я допоможу тобі конвертувати задану кількість чашок, ложок, склянок, каструль, ополоників в мілілітри. \
-                      \nНапиши в такому форматі: 5 чашки в мілілітри.")
-@bot.message_handler(func = lambda message: True)
-def handle_message(message):
-    text = message.text.lower()
-    try:
-        parts = text.split(" в ")
-        value_and_from_unit = parts[0].split()
-        to_unit = parts[1]
-        value = float(value_and_from_unit[0])
-        from_unit = value_and_from_unit[1]
-        result = convert_unit(value, from_unit, to_unit)
-        if result is not None:
-            bot.send_message(message.chat.id, f"{value} {from_unit} = {result:.2f} {to_unit}")
-        else:
-            bot.send_message(message.chat.id, "перепрошую спробуйте ще раз")
-    except Exception as e:
-        bot.send_message(message.chat.id, "Все погано у тебе помилка в коді")
-bot.polling()'''
+        bot.reply_to(message, "Мемів поки немає :(")
+
+@bot.message_handler(commands=['count'])
+def meme_count(message):
+    if memes:
+        memes_count = len(memes)
+        bot.reply_to(message,  f"Додано мемів: {len(memes)}" if memes else "Мемів не знайдено!")
+
+bot.polling()
