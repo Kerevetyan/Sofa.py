@@ -1,50 +1,27 @@
-import tkinter as tk
+import pygame
 
-def my_func():
-    button.config(text = "Ви привітались:)")
+pygame.init()
 
-def func2():
-    label.config(font =("Calibri", 25), fg = "red")
-
-def func3():
-    text = entry.get()
-    if text.strip():
-        label.config(text = f"Привіт, {text}!", font = ("Arial", 18), fg = "black")
-
-root = tk.Tk()
-root.title("Greeting")
-root.geometry("800x500")
-label = tk.Label(root, text = "Напишіть своє ім'я", font = ("Arial", 20), fg = "blue")
-label.pack()
-button = tk.Button(root, text = "Привітатись", command=my_func, fg = "purple")
-button.pack()
-button2 = tk.Button(root, text = "Змінити колір надпису", command=func2, fg = "purple")
-button2.pack()
-entry = tk.Entry(root)
-entry.pack()
-button3 = tk.Button(root, text = "Натискай)", command=func3, fg = "violet")
-button3.pack()
-
-root.mainloop()
-
-# прграма яка змінює колір фону
-
-import tkinter as tk
-import random
-
-colors = ["red", "blue", "green", "yellow", "purple", "orange", "pink", "cyan", "magenta", "lime"]
-
-def change_color():
-    root.config(bg=random.choice(colors))
-
-root = tk.Tk()
-root.title("Зміна кольору фону")
-root.geometry("500x300")
-
-label = tk.Label(root, text="Натисни кнопку, щоб змінити колір фону!", font=("Arial", 14))
-label.pack(pady=20)
-
-button = tk.Button(root, text="Магія (змінити колір)", command=change_color, font=("Arial", 12))
-button.pack(pady=10)
-
-root.mainloop()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Рух об'єкта за допомогою Enter")
+rect_position = pygame.math.Vector2(300, 200)
+object_size = 100
+object_color = (78, 3, 255)
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_RIGHT:
+                rect_position.x += 50
+            elif event.key == pygame.K_LEFT:
+                rect_position.x -= 50
+            elif event.key == pygame.K_DOWN:
+                rect_position.y += 50
+            elif event.key == pygame.K_UP:
+                rect_position.y -= 50
+    screen.fill((0, 1, 5))
+    pygame.draw.rect(screen, object_color, (rect_position.x, rect_position.y, object_size, object_size))
+    pygame.display.flip()
+pygame.quit()
